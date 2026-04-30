@@ -18,7 +18,7 @@ public class UserCitazioniController {
 
     private final UserCitazioniService userCitazioniService;
 
-    @PostMapping
+    @PostMapping("/aggiungiCitazioni")
     public ResponseEntity<UserCitazioni> aggiungiCitazione(
             @RequestBody UserCitazioneRequest request,
             Authentication authentication) {
