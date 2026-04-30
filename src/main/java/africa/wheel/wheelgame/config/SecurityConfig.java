@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/citazioni/**").permitAll()
                 .requestMatchers("/api/users/money").permitAll()
+                .requestMatchers("/ws-wheel/**").permitAll()
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults());

@@ -29,5 +29,6 @@ public class User {
     private Double money;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private java.util.List<UserCitazioni> userCitazioni;
 }

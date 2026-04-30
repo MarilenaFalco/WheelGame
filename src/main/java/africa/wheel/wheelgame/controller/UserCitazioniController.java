@@ -1,6 +1,7 @@
 package africa.wheel.wheelgame.controller;
 
 import africa.wheel.wheelgame.dto.UserCitazioneRequest;
+import africa.wheel.wheelgame.model.User;
 import africa.wheel.wheelgame.model.UserCitazioni;
 import africa.wheel.wheelgame.service.UserCitazioniService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user-citazioni")
@@ -26,5 +29,12 @@ public class UserCitazioniController {
         String email = authentication.getName();
         UserCitazioni saved = userCitazioniService.aggiungiCitazione(email, request);
         return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/userCitazioni")
+    public ResponseEntity<List<UserCitazioni>> retrieveCitazioni(@RequestBody Authentication authentication){
+        User user = (User) authentication.getPrincipal();
+        String email = user.getEmail();
+        return ResponseEntity.ok(userCitazioniService.getUserCitazioniByEmail(email));
     }
 }
