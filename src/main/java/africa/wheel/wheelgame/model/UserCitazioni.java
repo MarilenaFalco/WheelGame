@@ -20,9 +20,6 @@ public class UserCitazioni {
     @JoinColumn(name = "user_email", referencedColumnName = "email", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private Double money;
-
     @ManyToOne
     @JoinColumn(name = "citazione_id", referencedColumnName = "id", nullable = false)
     private Citazioni citazione;

@@ -30,10 +30,17 @@ public class UserCitazioniService {
         UserCitazioni userCitazioni = UserCitazioni.builder()
                 .user(user)
                 .citazione(citazione)
-                .money(request.getMoney())
                 .rarita(citazione.getRarity())
                 .build();
 
+        User userUpdate = User.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .username(user.getUsername())
+                .money(user.getMoney())
+                .build();
+        userRepository.save(userUpdate);
         return userCitazioniRepository.save(userCitazioni);
     }
 }
