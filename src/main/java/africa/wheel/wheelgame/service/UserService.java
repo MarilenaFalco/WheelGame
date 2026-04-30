@@ -8,7 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Map<String, List<String>> loginErrors = new ConcurrentHashMap<>();
 
     public User register(RegisterRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
@@ -35,13 +40,31 @@ public class UserService {
     }
 
     public User login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Password errata");
+        String identifier = request.getUsername();
+        
+        Optional<User> userOpt = userRepository.findByUsername(identifier);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByEmail(identifier);
         }
 
-        return user;
+        if (userOpt.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
+            List<String> errors = loginErrors.computeIfAbsent(identifier, k -> new ArrayList<>());
+            int attempt = errors.size() + 1;
+            
+            String message;
+            if (attempt == 1) {
+                message = "hai sbagliato, MIIIINCHIA";
+            } else if (attempt == 2) {
+                message = "MA LO HAI FATTO IL CORSO???";
+            } else {
+                message = "ALTRO GIRO ALTRA CORSA";
+            }
+            
+            errors.add(message);
+            throw new RuntimeException(errors.toString());
+        }
+
+        loginErrors.remove(identifier);
+        return userOpt.get();
     }
 }
