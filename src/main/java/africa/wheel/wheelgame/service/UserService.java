@@ -40,20 +40,25 @@ public class UserService {
     }
 
     public User login(LoginRequest request) {
-        String identifier = request.getUsername();
+        String inputIdentifier = request.getUsername();
         
-        Optional<User> userOpt = userRepository.findByUsername(identifier);
+        Optional<User> userOpt = userRepository.findByUsername(inputIdentifier);
         if (userOpt.isEmpty()) {
-            userOpt = userRepository.findByEmail(identifier);
+            userOpt = userRepository.findByEmail(inputIdentifier);
         }
 
+        // Usiamo l'email trovata nel DB come chiave per i tentativi, 
+        // così se l'utente alterna tra username e email il conteggio persiste.
+        // Se l'utente non esiste, usiamo l'input originale.
+        String trackingKey = userOpt.isPresent() ? userOpt.get().getEmail() : inputIdentifier;
+
         if (userOpt.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
-            List<String> errors = loginErrors.computeIfAbsent(identifier, k -> new ArrayList<>());
+            List<String> errors = loginErrors.computeIfAbsent(trackingKey, k -> new ArrayList<>());
             int attempt = errors.size() + 1;
             
             String message;
             if (attempt == 1) {
-                message = "hai sbagliato, MIIIINCHIA";
+                message = "hai sbagliato MIIIINCHIA";
             } else if (attempt == 2) {
                 message = "MA LO HAI FATTO IL CORSO???";
             } else {
@@ -64,7 +69,7 @@ public class UserService {
             throw new RuntimeException(errors.toString());
         }
 
-        loginErrors.remove(identifier);
+        loginErrors.remove(trackingKey);
         return userOpt.get();
     }
 }
