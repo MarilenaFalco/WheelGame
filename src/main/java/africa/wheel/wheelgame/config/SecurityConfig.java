@@ -33,6 +33,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/citazioni/**").permitAll()
+                .requestMatchers("/api/users/money").permitAll()
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults());

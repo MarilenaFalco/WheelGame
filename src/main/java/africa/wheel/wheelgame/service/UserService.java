@@ -73,4 +73,11 @@ public class UserService {
         return userOpt.get();
     }
 
+    public User updateMoney(String username, Double money) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato con username: " + username));
+        user.setMoney(money);
+        return userRepository.save(user);
+    }
+
 }
