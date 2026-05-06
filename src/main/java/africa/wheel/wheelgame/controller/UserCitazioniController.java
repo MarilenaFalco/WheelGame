@@ -2,6 +2,7 @@ package africa.wheel.wheelgame.controller;
 
 import africa.wheel.wheelgame.dto.UserCitazioneRequest;
 import africa.wheel.wheelgame.model.UserCitazioni;
+import africa.wheel.wheelgame.projection.UserCitazioniProjection;
 import africa.wheel.wheelgame.service.UserCitazioniService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,6 @@ public class UserCitazioniController {
     @PostMapping("/aggiungiCitazioni")
     public ResponseEntity<UserCitazioni> aggiungiCitazione(
             @RequestBody UserCitazioneRequest request) {
-//        String email = "falcomarilena.mf@gmail.com";
-//        request.setEmail(email);
         if (request.getEmail() == null) {
             return ResponseEntity.status(401).build();
         }
@@ -29,7 +28,7 @@ public class UserCitazioniController {
     }
 
     @GetMapping("/userCitazioni")
-    public ResponseEntity<List<UserCitazioni>> retrieveCitazioni(@RequestParam String email){
+    public ResponseEntity<List<UserCitazioniProjection>> retrieveCitazioni(@RequestParam String email){
         if (email == null || email.isEmpty()) {
             return ResponseEntity.status(401).build();
         }

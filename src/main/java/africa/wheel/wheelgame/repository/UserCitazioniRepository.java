@@ -1,6 +1,7 @@
 package africa.wheel.wheelgame.repository;
 
 import africa.wheel.wheelgame.model.UserCitazioni;
+import africa.wheel.wheelgame.projection.UserCitazioniProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface UserCitazioniRepository extends JpaRepository<UserCitazioni, Long> {
-    List<UserCitazioni> findUserCitazionisByUserEmail(String email);
+    List<UserCitazioniProjection> findByUserEmail(String email);
 }

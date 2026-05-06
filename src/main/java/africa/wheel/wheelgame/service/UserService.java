@@ -5,6 +5,7 @@ import africa.wheel.wheelgame.dto.RegisterRequest;
 import africa.wheel.wheelgame.model.User;
 import africa.wheel.wheelgame.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,15 +15,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final Map<String, List<String>> loginErrors = new ConcurrentHashMap<>();
 
     public User register(RegisterRequest request) {
+        log.info("Tentativo di registrazione per username: {}", request.getUsername());
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new RuntimeException("Username già in uso");
         }
@@ -42,34 +44,19 @@ public class UserService {
 
     public User login(LoginRequest request) {
         String inputIdentifier = request.getUsername();
+        log.info("Tentativo di login per: {}", inputIdentifier);
         
-        Optional<User> userOpt = userRepository.findByUsername(inputIdentifier);
-        if (userOpt.isEmpty()) {
-            userOpt = userRepository.findByEmail(inputIdentifier);
+        User user = userRepository.findByUsername(inputIdentifier)
+                .or(() -> userRepository.findByEmail(inputIdentifier))
+                .orElseThrow(() -> new RuntimeException("Credenziali non valide"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("Password errata per: {}", inputIdentifier);
+            throw new RuntimeException("Credenziali non valide");
         }
 
-        String trackingKey = userOpt.isPresent() ? userOpt.get().getEmail() : inputIdentifier;
-
-        if (userOpt.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
-            List<String> errors = loginErrors.computeIfAbsent(trackingKey, k -> new ArrayList<>());
-            int attempt = errors.size() + 1;
-            
-            String message;
-            if (attempt == 1) {
-                message = "hai sbagliato MIIIINCHIA";
-            } else if (attempt == 2) {
-                message = "MA LO HAI FATTO IL CORSO???";
-            } else {
-                message = "ALTRO GIRO ALTRA CORSA";
-            }
-            
-            errors.add(message);
-            throw new RuntimeException(errors.toString());
-        }
-
-        loginErrors.remove(trackingKey);
-
-        return userOpt.get();
+        log.info("Login effettuato con successo per: {}", user.getEmail());
+        return user;
     }
 
     public User updateMoney(String username, Double money) {
