@@ -19,7 +19,8 @@ public class UserCitazioniController {
     @PostMapping("/aggiungiCitazioni")
     public ResponseEntity<UserCitazioni> aggiungiCitazione(
             @RequestBody UserCitazioneRequest request) {
-        
+//        String email = "falcomarilena.mf@gmail.com";
+//        request.setEmail(email);
         if (request.getEmail() == null) {
             return ResponseEntity.status(401).build();
         }

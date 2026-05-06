@@ -41,14 +41,8 @@ public class UserCitazioniService {
                 .rarita(citazione.getRarity())
                 .build();
 
-        User userUpdate = User.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .username(user.getUsername())
-                .money(request.getMoney())
-                .build();
-        userRepository.save(userUpdate);
+        user.setMoney(request.getMoney());
+        userRepository.save(user);
         UserCitazioni saved = userCitazioniRepository.save(userCitazioni);
 
         // Invio evento Kafka
