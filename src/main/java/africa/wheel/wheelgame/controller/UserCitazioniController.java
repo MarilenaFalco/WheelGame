@@ -1,16 +1,11 @@
 package africa.wheel.wheelgame.controller;
 
 import africa.wheel.wheelgame.dto.UserCitazioneRequest;
-import africa.wheel.wheelgame.model.User;
 import africa.wheel.wheelgame.model.UserCitazioni;
 import africa.wheel.wheelgame.service.UserCitazioniService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,18 +18,20 @@ public class UserCitazioniController {
 
     @PostMapping("/aggiungiCitazioni")
     public ResponseEntity<UserCitazioni> aggiungiCitazione(
-            @RequestBody UserCitazioneRequest request,
-            Authentication authentication) {
+            @RequestBody UserCitazioneRequest request) {
         
-        String email = authentication.getName();
-        UserCitazioni saved = userCitazioniService.aggiungiCitazione(email, request);
+        if (request.getEmail() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UserCitazioni saved = userCitazioniService.aggiungiCitazione(request.getEmail(), request);
         return ResponseEntity.ok(saved);
     }
 
-    @PostMapping("/userCitazioni")
-    public ResponseEntity<List<UserCitazioni>> retrieveCitazioni(@RequestBody Authentication authentication){
-        User user = (User) authentication.getPrincipal();
-        String email = user.getEmail();
+    @GetMapping("/userCitazioni")
+    public ResponseEntity<List<UserCitazioni>> retrieveCitazioni(@RequestParam String email){
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.status(401).build();
+        }
         return ResponseEntity.ok(userCitazioniService.getUserCitazioniByEmail(email));
     }
 }

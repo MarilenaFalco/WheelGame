@@ -14,8 +14,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -28,16 +26,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(withDefaults())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/citazioni/**").permitAll()
-                .requestMatchers("/api/users/money").permitAll()
-                .requestMatchers("/ws-wheel/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
-            .httpBasic(withDefaults());
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+            .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));
         
         return http.build();
     }
@@ -45,11 +40,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Permette tutte le origini
-        configuration.setAllowedMethods(Arrays.asList("*"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); 
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
+        configuration.setExposedHeaders(Arrays.asList("Set-Cookie"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

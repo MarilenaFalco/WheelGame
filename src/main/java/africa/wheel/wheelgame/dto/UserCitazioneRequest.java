@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCitazioneRequest {
+    private String email;
     private Long citazioneId;
     private Double money;
 }

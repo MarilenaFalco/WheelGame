@@ -48,9 +48,6 @@ public class UserService {
             userOpt = userRepository.findByEmail(inputIdentifier);
         }
 
-        // Usiamo l'email trovata nel DB come chiave per i tentativi, 
-        // così se l'utente alterna tra username e email il conteggio persiste.
-        // Se l'utente non esiste, usiamo l'input originale.
         String trackingKey = userOpt.isPresent() ? userOpt.get().getEmail() : inputIdentifier;
 
         if (userOpt.isEmpty() || !passwordEncoder.matches(request.getPassword(), userOpt.get().getPassword())) {
@@ -71,6 +68,7 @@ public class UserService {
         }
 
         loginErrors.remove(trackingKey);
+
         return userOpt.get();
     }
 
@@ -80,6 +78,4 @@ public class UserService {
         user.setMoney(money);
         return userRepository.save(user);
     }
-
-
 }
