@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface UserCitazioniRepository extends JpaRepository<UserCitazioni, Long> {
-    List<UserCitazioniProjection> findByUserEmail(String email);
+    List<UserCitazioniProjection> findCitazioneIdAndRaritaValoreByUserEmail(String email);
 }

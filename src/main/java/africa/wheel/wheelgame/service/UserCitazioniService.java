@@ -75,6 +75,6 @@ public class UserCitazioniService {
     }
 
     public List<UserCitazioniProjection> getUserCitazioniByEmail(String email){
-        return userCitazioniRepository.findByUserEmail(email);
+        return userCitazioniRepository.findCitazioneIdAndRaritaValoreByUserEmail(email);
     }
 }
