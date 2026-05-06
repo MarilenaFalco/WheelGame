@@ -12,7 +12,6 @@ import africa.wheel.wheelgame.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +25,7 @@ public class UserCitazioniService {
     private final UserCitazioniRepository userCitazioniRepository;
     private final UserRepository userRepository;
     private final CitazioniRepository citazioniRepository;
-    private final org.springframework.beans.factory.ObjectProvider<KafkaTemplate<String, Object>> kafkaTemplateProvider;
+    private final KafkaProducerService kafkaProducerService;
 
     @Value("${spring.kafka.enabled:false}")
     private boolean kafkaEnabled;
@@ -49,7 +48,7 @@ public class UserCitazioniService {
         userRepository.save(user);
         UserCitazioni saved = userCitazioniRepository.save(userCitazioni);
 
-        // Invio evento per notifica
+        // Invio evento per notifica via thread asincrono separato per non bloccare la transazione
         if (kafkaEnabled) {
             CitationEvent event = CitationEvent.builder()
                     .username(user.getUsername())
@@ -57,18 +56,7 @@ public class UserCitazioniService {
                     .rarity(citazione.getRarity() != null ? citazione.getRarity().getNome() : "Unknown")
                     .build();
             
-            kafkaTemplateProvider.ifAvailable(template -> {
-                try {
-                    template.send(africa.wheel.wheelgame.config.KafkaConfig.CITATION_TOPIC, event)
-                            .whenComplete((result, ex) -> {
-                                if (ex != null) {
-                                    log.error("Errore asincrono Kafka: {}", ex.getMessage());
-                                }
-                            });
-                } catch (Exception e) {
-                    log.error("Errore immediato Kafka: {}", e.getMessage());
-                }
-            });
+            kafkaProducerService.sendCitationEvent(event);
         }
 
         return saved;
